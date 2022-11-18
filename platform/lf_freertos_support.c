@@ -4,9 +4,17 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+#include "/home/silje/lf/freertos-support/SDK_2_12_0_FRDM-K22F/rtos/freertos/freertos_kernel/include/FreeRTOS.h"
+#include "/home/silje/lf/freertos-support/SDK_2_12_0_FRDM-K22F/rtos/freertos/freertos_kernel/include/task.h"
+#include "/home/silje/lf/freertos-support/SDK_2_12_0_FRDM-K22F/rtos/freertos/freertos_kernel/include/queue.h"
+#include "/home/silje/lf/freertos-support/SDK_2_12_0_FRDM-K22F/rtos/freertos/freertos_kernel/include/timers.h"
+
 #include "lf_freertos_support.h"
 #include "../platform.h"
 #include "../utils/util.h"
+
+#define TICKS_TO_NS(ticks, freq) ((uint64_t)ticks*1000000000)/freq
+#define NS_TO_TICKS(ns, freq) (ns*freq)/1000000000
 
 // configUSE_16_BIT_TICKS = 0; For å få uint32_t TickType_t
 // configSUPPORT_DYNAMIC_ALLOCATION must be set to 1 for tassk creation
@@ -41,14 +49,15 @@ int lf_critical_section_exit(){
  * @return 0 on success, platform-specific error number otherwise.
  */
 int lf_notify_of_event(){
-
+    xTaskNotifyGive( TaskHandle_t xTaskToNotify );
 }
+
 
 /**
  * @brief Get the number of cores on the host machine.
  */
 int lf_available_cores(){
-    return 1; // freertos doesn't support multicores.
+    return 1; // freertos doesn't support multiple cores.
 }
 
 /**
@@ -163,12 +172,18 @@ int lf_cond_timedwait(lf_cond_t* cond, lf_mutex_t* mutex, instant_t absolute_tim
 
 }
 
-
 /**
  * Initialize the LF clock. Must be called before using other clock-related APIs.
  */
 void lf_initialize_clock(void){
 
+    /* Init board hardware. */
+    BOARD_InitBootPins();
+    BOARD_InitBootClocks();
+    BOARD_InitDebugConsole();
+
+    /* Start scheduler and tick counting */
+    vTaskStartScheduler();
 }
 
 /**
@@ -181,7 +196,8 @@ void lf_initialize_clock(void){
  * @return 0 for success, or -1 for failure
  */
 int lf_clock_gettime(instant_t* t){
-
+    TickType_t ticks = xTaskGetTickCount();
+    *t = ((instant_t)TICKS_TO_NS(ticks, configTICK_RATE_HZ));
 }
 
 /**
@@ -190,8 +206,25 @@ int lf_clock_gettime(instant_t* t){
  */
 int lf_sleep(interval_t sleep_duration){
 
+    uint32_t ulWaitForEvent;
+
+    // Task notification that, if doesn't receive event, blocks for duration time. Check units!
+    ulWaitForEvent = ulTaskNotifyTake(pdTrue, NS_TO_TICKS(sleep_duration, configTICK_RATE_HZ));
+
+    if (ulWaitForEvent == 0) {
+        // if finished block and no event; sleep finished
+        return 0;
+    } else {
+        // it was interrupted
+        return -1;
+    }
 }
 
 int lf_sleep_until(instant_t wakeup_time){
-
+    
+    instant_t now;
+    lf_clock_gettime(&now);
+    TickType_t sleep_duration = wakeup_time - now;
+    
+    return lf_sleep(sleep_duration);
 }
