@@ -1,4 +1,5 @@
 target C {
+    threading: false,
     build: "../scripts/build_nxp_unix.sh",
 };
 

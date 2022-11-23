@@ -8,6 +8,7 @@
 #include "/home/silje/lf/freertos-support/SDK_2_12_0_FRDM-K22F/rtos/freertos/freertos_kernel/include/task.h"
 #include "/home/silje/lf/freertos-support/SDK_2_12_0_FRDM-K22F/rtos/freertos/freertos_kernel/include/queue.h"
 #include "/home/silje/lf/freertos-support/SDK_2_12_0_FRDM-K22F/rtos/freertos/freertos_kernel/include/timers.h"
+#include "/home/silje/lf/freertos-support/SDK_2_12_0_FRDM-K22F/rtos/freertos/freertos_kernel/include/event_groups.h"
 
 #include "lf_freertos_support.h"
 #include "../platform.h"
@@ -15,6 +16,10 @@
 
 #define TICKS_TO_NS(ticks, freq) ((uint64_t)ticks*1000000000)/freq
 #define NS_TO_TICKS(ns, freq) (ns*freq)/1000000000
+#define ACTION_EVENT_BIT ( 1UL << 0UL ) // Bit for event group to check
+
+uint32_t clock_offset_ticks = 0; 
+EventGroupHandle_t eventGroupHandle;
 
 // configUSE_16_BIT_TICKS = 0; For å få uint32_t TickType_t
 // configSUPPORT_DYNAMIC_ALLOCATION must be set to 1 for tassk creation
@@ -49,127 +54,7 @@ int lf_critical_section_exit(){
  * @return 0 on success, platform-specific error number otherwise.
  */
 int lf_notify_of_event(){
-    xTaskNotifyGive( TaskHandle_t xTaskToNotify );
-}
-
-
-/**
- * @brief Get the number of cores on the host machine.
- */
-int lf_available_cores(){
-    return 1; // freertos doesn't support multiple cores.
-}
-
-/**
- * Create a new thread, starting with execution of lf_thread
- * getting passed arguments. The new handle is stored in thread_id.
- *
- * @return 0 on success, platform-specific error number otherwise.
- *
- */
-int lf_thread_create(lf_thread_t* thread, void *(*lf_thread) (void *), void* arguments){ //may yse xTaskCreateStatic if static allocation
-    
-    BaseType_t xReturned;
-    xReturned = xTaskCreate(lf_thread, NULL, 100, arguments, 1, NULL); // No name, 100*4 Byte stack, priority 1, no handle
-    if (xReturned == pdPASS){
-        return 0;
-    } else {
-        return errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY; //what to return if error?
-    }
-}
-
-/**
- * Make calling thread wait for termination of the thread.  The
- * exit status of the thread is stored in thread_return, if thread_return
- * is not NULL.
- * 
- * @return 0 on success, platform-specific error number otherwise.
- */
-int lf_thread_join(lf_thread_t thread, void** thread_return){
-    vTaskDelete(thread); //er dette en handle, da?
-    return 0; //how to check if failed?
-}
-
-/**
- * Initialize a mutex.
- * 
- * @return 0 on success, platform-specific error number otherwise.
- */
-int lf_mutex_init(lf_mutex_t* mutex){
-    SemaphoreHandle_t xMutexHandle; // hvordan oversette dette til lf_mutex_t?
-    xMutexHandle = xSemaphoreCreateMutex();
-    if (xMutexHandle == NULL){
-        return 1; //not success - should have something else here?
-    } else {
-        return 0;
-    }
-}
-
-/**
- * Lock a mutex.
- * 
- * @return 0 on success, platform-specific error number otherwise.
- */
-int lf_mutex_lock(lf_mutex_t* mutex){
-    xSemaphoreTake( mutex, portMAX_DELAY ); //if not use portMAX_DELAY
-}
-
-/** 
- * Unlock a mutex.
- * 
- * @return 0 on success, platform-specific error number otherwise.
- */
-int lf_mutex_unlock(lf_mutex_t* mutex){
-
-}
-
-/** 
- * Initialize a conditional variable.
- * 
- * @return 0 on success, platform-specific error number otherwise.
- */
-int lf_cond_init(lf_cond_t* cond){
-
-}
-
-/** 
- * Wake up all threads waiting for condition variable cond.
- * 
- * @return 0 on success, platform-specific error number otherwise.
- */
-int lf_cond_broadcast(lf_cond_t* cond){
-
-}
-
-/** 
- * Wake up one thread waiting for condition variable cond.
- * 
- * @return 0 on success, platform-specific error number otherwise.
- */
-int lf_cond_signal(lf_cond_t* cond){
-
-}
-
-/** 
- * Wait for condition variable "cond" to be signaled or broadcast.
- * "mutex" is assumed to be locked before.
- * 
- * @return 0 on success, platform-specific error number otherwise.
- */
-int lf_cond_wait(lf_cond_t* cond, lf_mutex_t* mutex){
-
-}
-
-/** 
- * Block current thread on the condition variable until condition variable
- * pointed by "cond" is signaled or time pointed by "absolute_time_ns" in
- * nanoseconds is reached.
- * 
- * @return 0 on success, LF_TIMEOUT on timeout, and platform-specific error
- *  number otherwise.
- */
-int lf_cond_timedwait(lf_cond_t* cond, lf_mutex_t* mutex, instant_t absolute_time_ns){
-
+    EventBits_t xEventGroupSetBits( eventGroupHandle, ACTION_EVENT_BIT );
 }
 
 /**
@@ -177,13 +62,18 @@ int lf_cond_timedwait(lf_cond_t* cond, lf_mutex_t* mutex, instant_t absolute_tim
  */
 void lf_initialize_clock(void){
 
-    /* Init board hardware. */
+    /* Init board hardware. here? */
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
     BOARD_InitDebugConsole();
 
-    /* Start scheduler and tick counting */
-    vTaskStartScheduler();
+    eventGroupHandle = xEventGroupCreate();
+    if (eventGroupHandle == NULL) {
+        PRINTF("Insufficient memory to create Event Group");
+    }
+
+    /* Get tick count at start of LF clock to offset time */
+    clock_offset_ticks = xTaskGetTickCount();
 }
 
 /**
@@ -196,7 +86,7 @@ void lf_initialize_clock(void){
  * @return 0 for success, or -1 for failure
  */
 int lf_clock_gettime(instant_t* t){
-    TickType_t ticks = xTaskGetTickCount();
+    TickType_t ticks = xTaskGetTickCount() - clock_offset_ticks;
     *t = ((instant_t)TICKS_TO_NS(ticks, configTICK_RATE_HZ));
 }
 
@@ -206,16 +96,18 @@ int lf_clock_gettime(instant_t* t){
  */
 int lf_sleep(interval_t sleep_duration){
 
-    uint32_t ulWaitForEvent;
+    // Event group blocks for sleep_duration, unless action event happens
+    // What if something else happens?
 
-    // Task notification that, if doesn't receive event, blocks for duration time. Check units!
-    ulWaitForEvent = ulTaskNotifyTake(pdTrue, NS_TO_TICKS(sleep_duration, configTICK_RATE_HZ));
+    EventBits_t resultBits;
+    resultBits = xEventGroupWaitBits( eventGroupHandle, ACTION_EVENT_BIT, pdTrue, pdFalse, 
+                                        NS_TO_TICKS(sleep_duration, configTICK_RATE_HZ) );
 
-    if (ulWaitForEvent == 0) {
-        // if finished block and no event; sleep finished
+    if ((resultBits & ACTION_EVENT_BIT) == 0) {
+        // blocked for sleep_duration
         return 0;
     } else {
-        // it was interrupted
+        // was interrupted by action
         return -1;
     }
 }
