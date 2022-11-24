@@ -27,10 +27,12 @@ SET(CMAKE_C_FLAGS_DEBUG " \
     -DFRDM_K22F \
     -DFREEDOM \
     -DMCUXPRESSO_SDK \
+    -DSDK_OS_FREE_RTOS \
     -g \
     -O0 \
     -mcpu=cortex-m4 \
     -Wall \
+    -Wno-format \
     -mfloat-abi=hard \
     -mfpu=fpv4-sp-d16 \
     -mthumb \
@@ -55,9 +57,11 @@ SET(CMAKE_C_FLAGS_RELEASE " \
     -DFRDM_K22F \
     -DFREEDOM \
     -DMCUXPRESSO_SDK \
+    -DSDK_OS_FREE_RTOS \
     -Os \
     -mcpu=cortex-m4 \
     -Wall \
+    -Wno-format \
     -mfloat-abi=hard \
     -mfpu=fpv4-sp-d16 \
     -mthumb \
@@ -80,6 +84,7 @@ SET(CMAKE_CXX_FLAGS_DEBUG " \
     -O0 \
     -mcpu=cortex-m4 \
     -Wall \
+    -Wno-format \
     -mfloat-abi=hard \
     -mfpu=fpv4-sp-d16 \
     -mthumb \
@@ -102,6 +107,7 @@ SET(CMAKE_CXX_FLAGS_RELEASE " \
     -Os \
     -mcpu=cortex-m4 \
     -Wall \
+    -Wno-format \
     -mfloat-abi=hard \
     -mfpu=fpv4-sp-d16 \
     -mthumb \
@@ -121,6 +127,7 @@ SET(CMAKE_EXE_LINKER_FLAGS_DEBUG " \
     -g \
     -mcpu=cortex-m4 \
     -Wall \
+    -Wno-format \
     -mfloat-abi=hard \
     -mfpu=fpv4-sp-d16 \
     --specs=nano.specs \
@@ -153,6 +160,7 @@ SET(CMAKE_EXE_LINKER_FLAGS_RELEASE " \
     ${CMAKE_EXE_LINKER_FLAGS_RELEASE} \
     -mcpu=cortex-m4 \
     -Wall \
+    -Wno-format \
     -mfloat-abi=hard \
     -mfpu=fpv4-sp-d16 \
     --specs=nano.specs \

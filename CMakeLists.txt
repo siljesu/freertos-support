@@ -45,6 +45,8 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
 "${ProjSDKPath}/boards/frdmk22f/project_template/clock_config.h"
 "${ProjSDKPath}/boards/frdmk22f/project_template/pin_mux.c"
 "${ProjSDKPath}/boards/frdmk22f/project_template/pin_mux.h"
+"${ProjSDKPath}/boards/frdmk22f/project_template/FreeRTOSConfig.h"
+"${ProjSDKPath}/rtos/freertos/freertos_kernel/portable/GCC/ARM_CM4F/portmacro.h"
 "${ProjDirPath}/src-gen/${ProjName}/${ProjName}.c"
 "${ProjDirPath}/src-gen/${ProjName}/core/platform/lf_freertos_support.c"
 "${ProjDirPath}/src-gen/${ProjName}/lib/schedule.c"
@@ -55,7 +57,7 @@ add_executable(${MCUX_SDK_PROJECT_NAME}
 )
 
 target_include_directories(${MCUX_SDK_PROJECT_NAME} PRIVATE
-${ProjSDKPath}/board
+${ProjSDKPath}/boards/frdmk22f/project_template
 )
 
 set(CMAKE_MODULE_PATH
@@ -68,6 +70,8 @@ ${ProjSDKPath}/devices/MK22F51212/drivers
 ${ProjSDKPath}/devices/MK22F51212/startup
 ${ProjSDKPath}/devices/MK22F51212/utilities
 ${ProjSDKPath}/devices/MK22F51212/utilities/debug_console_lite
+${ProjSDKPath}/rtos/freertos/freertos_kernel
+${ProjSDKPath}/rtos/freertos/freertos_kernel/portable/GCC/ARM_CM4F
 )
 
 # include modules
@@ -80,6 +84,8 @@ include(driver_gpio_MK22F51212)
 include(driver_clock_MK22F51212)
 
 include(driver_common_MK22F51212)
+
+include(middleware_freertos-kernel_heap_4_MK22F51212)
 
 include(device_MK22F51212_CMSIS_MK22F51212)
 
@@ -102,6 +108,10 @@ include(CMSIS_Include_core_cm_MK22F51212)
 include(utilities_misc_utilities_MK22F51212)
 
 include(device_MK22F51212_system_MK22F51212)
+
+include(middleware_freertos-kernel_MK22F51212)
+
+include(middleware_freertos-kernel_extension_MK22F51212)
 
 include(driver_pit_MK22F51212)
 
