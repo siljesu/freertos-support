@@ -19,7 +19,7 @@
 #include "../../../SDK_2_12_0_FRDM-K22F/boards/frdmk22f/project_template/pin_mux.h"
 
 #define TICKS_TO_NS(ticks, freq) ((uint64_t)ticks*1000000000)/freq
-#define NS_TO_TICKS(ns, freq) (ns*freq)/1000000000
+#define NS_TO_TICKS(ns, freq) (uint32_t)((ns*freq)/1000000000)
 #define ACTION_EVENT_BIT ( 1UL << 0UL ) // Bit for event group to check
 
 uint32_t clock_offset_ticks = 0; 
@@ -106,16 +106,29 @@ int lf_sleep(interval_t sleep_duration){
 
     // Event group blocks for sleep_duration, unless action event happens
     // What if something else happens?
-
+    PRINTF("\r\n going to sleep for %lld ns\r\n", sleep_duration);
+    PRINTF("\r\n which equals %ld ticks (freq: %ld)\r\n", NS_TO_TICKS(sleep_duration,configTICK_RATE_HZ), configTICK_RATE_HZ);
     EventBits_t resultBits;
-    resultBits = xEventGroupWaitBits( eventGroupHandle, ACTION_EVENT_BIT, pdTRUE, pdFALSE, 
-                                        NS_TO_TICKS(sleep_duration, configTICK_RATE_HZ) );
+
+    TickType_t ticks = xTaskGetTickCount() - clock_offset_ticks;
+    PRINTF("\r\n Ticks before sleep: %ld \r\n", ticks);
+
+    lf_critical_section_exit();
+
+    resultBits = xEventGroupWaitBits( eventGroupHandle, ACTION_EVENT_BIT, pdTRUE, pdFALSE, pdMS_TO_TICKS(sleep_duration/1000000) );
+
+    lf_critical_section_enter();
+
+    ticks = xTaskGetTickCount() - clock_offset_ticks;
+    PRINTF("\r\n Ticks after sleep: %ld \r\n", ticks);
 
     if ((resultBits & ACTION_EVENT_BIT) == 0) {
         // blocked for sleep_duration
+        PRINTF("\r\n Sleep success \r\n");
         return 0;
     } else {
         // was interrupted by action
+        PRINTF("\r\n Sleep interrupted \r\n");
         return -1;
     }
 }
@@ -124,7 +137,7 @@ int lf_sleep_until(instant_t wakeup_time){
     
     instant_t now;
     lf_clock_gettime(&now);
-    TickType_t sleep_duration = wakeup_time - now;
+    interval_t sleep_duration = wakeup_time - now;
     
     return lf_sleep(sleep_duration);
 }

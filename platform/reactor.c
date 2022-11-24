@@ -266,12 +266,12 @@ int next(void) {
         } else {
             next_tag.microstep = 0;
         }
-        if (_lf_is_tag_after_stop_tag(next_tag)) {
-            // Cannot process events after the stop tag.
-            next_tag = stop_tag;
-        }
     }
     
+    if (_lf_is_tag_after_stop_tag(next_tag)) {
+        // Cannot process events after the stop tag.
+        next_tag = stop_tag;
+    }
     // Wait until physical time >= event.time.
     int finished_sleep = wait_until(next_tag.time);
     LF_PRINT_LOG("Next event (elapsed) time is " PRINTF_TIME ".", next_tag.time - start_time);

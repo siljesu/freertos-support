@@ -15,9 +15,9 @@ main reactor {
     logical action a;
     reaction(startup) -> a {=
         PRINTF("hello world, from FreeRTOS!\r\n");
-        lf_schedule(a, SEC(5));
+        lf_schedule(a, SEC(20));
     =}
     reaction(a) {=
-        PRINTF("hype\r\n");
+        PRINTF("hype at logical time: %lld \r\n", lf_time_logical_elapsed());
     =}
 }
