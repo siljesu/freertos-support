@@ -4,15 +4,19 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-#include "/home/silje/lf/freertos-support/SDK_2_12_0_FRDM-K22F/rtos/freertos/freertos_kernel/include/FreeRTOS.h"
-#include "/home/silje/lf/freertos-support/SDK_2_12_0_FRDM-K22F/rtos/freertos/freertos_kernel/include/task.h"
-#include "/home/silje/lf/freertos-support/SDK_2_12_0_FRDM-K22F/rtos/freertos/freertos_kernel/include/queue.h"
-#include "/home/silje/lf/freertos-support/SDK_2_12_0_FRDM-K22F/rtos/freertos/freertos_kernel/include/timers.h"
-#include "/home/silje/lf/freertos-support/SDK_2_12_0_FRDM-K22F/rtos/freertos/freertos_kernel/include/event_groups.h"
+#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
+#include "timers.h"
+#include "event_groups.h"
 
 #include "lf_freertos_support.h"
 #include "../platform.h"
 #include "../utils/util.h"
+
+#include "../../../SDK_2_12_0_FRDM-K22F/boards/frdmk22f/project_template/board.h"
+#include "../../../SDK_2_12_0_FRDM-K22F/boards/frdmk22f/project_template/clock_config.h"
+#include "../../../SDK_2_12_0_FRDM-K22F/boards/frdmk22f/project_template/pin_mux.h"
 
 #define TICKS_TO_NS(ticks, freq) ((uint64_t)ticks*1000000000)/freq
 #define NS_TO_TICKS(ns, freq) (ns*freq)/1000000000
@@ -38,6 +42,7 @@ EventGroupHandle_t eventGroupHandle;
  */
 int lf_critical_section_enter(){
     taskENTER_CRITICAL();
+    return 0;
 }
 
 /**
@@ -46,6 +51,7 @@ int lf_critical_section_enter(){
  */
 int lf_critical_section_exit(){
     taskEXIT_CRITICAL();
+    return 0;
 }
 
 /**
@@ -54,7 +60,8 @@ int lf_critical_section_exit(){
  * @return 0 on success, platform-specific error number otherwise.
  */
 int lf_notify_of_event(){
-    EventBits_t xEventGroupSetBits( eventGroupHandle, ACTION_EVENT_BIT );
+    xEventGroupSetBits( eventGroupHandle, ACTION_EVENT_BIT );
+    return 0;
 }
 
 /**
@@ -88,6 +95,7 @@ void lf_initialize_clock(void){
 int lf_clock_gettime(instant_t* t){
     TickType_t ticks = xTaskGetTickCount() - clock_offset_ticks;
     *t = ((instant_t)TICKS_TO_NS(ticks, configTICK_RATE_HZ));
+    return 0;
 }
 
 /**
@@ -100,7 +108,7 @@ int lf_sleep(interval_t sleep_duration){
     // What if something else happens?
 
     EventBits_t resultBits;
-    resultBits = xEventGroupWaitBits( eventGroupHandle, ACTION_EVENT_BIT, pdTrue, pdFalse, 
+    resultBits = xEventGroupWaitBits( eventGroupHandle, ACTION_EVENT_BIT, pdTRUE, pdFALSE, 
                                         NS_TO_TICKS(sleep_duration, configTICK_RATE_HZ) );
 
     if ((resultBits & ACTION_EVENT_BIT) == 0) {
