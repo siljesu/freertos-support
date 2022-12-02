@@ -14,10 +14,6 @@
 #include "../platform.h"
 #include "../utils/util.h"
 
-#include "../../../SDK_2_12_0_FRDM-K22F/boards/frdmk22f/project_template/board.h"
-#include "../../../SDK_2_12_0_FRDM-K22F/boards/frdmk22f/project_template/clock_config.h"
-#include "../../../SDK_2_12_0_FRDM-K22F/boards/frdmk22f/project_template/pin_mux.h"
-
 #define TICKS_TO_NS(ticks, freq) ((uint64_t)ticks*1000000000)/freq
 #define NS_TO_TICKS(ns, freq) (uint32_t)((ns*freq)/1000000000)
 #define ACTION_EVENT_BIT ( 1UL << 0UL ) // Bit for event group to check
@@ -69,11 +65,6 @@ int lf_notify_of_event(){
  */
 void lf_initialize_clock(void){
 
-    /* Init board hardware. here? */
-    BOARD_InitBootPins();
-    BOARD_InitBootClocks();
-    BOARD_InitDebugConsole();
-
     eventGroupHandle = xEventGroupCreate();
     if (eventGroupHandle == NULL) {
         PRINTF("Insufficient memory to create Event Group");
@@ -107,20 +98,20 @@ int lf_sleep(interval_t sleep_duration){
     // Event group blocks for sleep_duration, unless action event happens
     // What if something else happens?
     PRINTF("\r\n going to sleep for %lld ns\r\n", sleep_duration);
-    PRINTF("\r\n which equals %ld ticks (freq: %ld)\r\n", NS_TO_TICKS(sleep_duration,configTICK_RATE_HZ), configTICK_RATE_HZ);
+    PRINTF("\r\n which equals %ld ticks (freq: %ld, sysclock: %ld)\r\n", NS_TO_TICKS(sleep_duration,configTICK_RATE_HZ), configTICK_RATE_HZ, configCPU_CLOCK_HZ);
     EventBits_t resultBits;
+
+    lf_critical_section_exit();
 
     TickType_t ticks = xTaskGetTickCount() - clock_offset_ticks;
     PRINTF("\r\n Ticks before sleep: %ld \r\n", ticks);
 
-    lf_critical_section_exit();
-
     resultBits = xEventGroupWaitBits( eventGroupHandle, ACTION_EVENT_BIT, pdTRUE, pdFALSE, pdMS_TO_TICKS(sleep_duration/1000000) );
-
-    lf_critical_section_enter();
 
     ticks = xTaskGetTickCount() - clock_offset_ticks;
     PRINTF("\r\n Ticks after sleep: %ld \r\n", ticks);
+
+    lf_critical_section_enter();
 
     if ((resultBits & ACTION_EVENT_BIT) == 0) {
         // blocked for sleep_duration
