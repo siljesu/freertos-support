@@ -20,6 +20,7 @@
 
 uint32_t clock_offset_ticks = 0; 
 EventGroupHandle_t eventGroupHandle;
+UBaseType_t uxSavedInterruptStatus;
 
 // configUSE_16_BIT_TICKS = 0; For å få uint32_t TickType_t
 // configSUPPORT_DYNAMIC_ALLOCATION must be set to 1 for tassk creation
@@ -37,7 +38,7 @@ EventGroupHandle_t eventGroupHandle;
  * @return 0 on success, platform-specific error number otherwise.
  */
 int lf_critical_section_enter(){
-    taskENTER_CRITICAL();
+    uxSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();
     return 0;
 }
 
@@ -46,7 +47,7 @@ int lf_critical_section_enter(){
  * @return 0 on success, platform-specific error number otherwise.
  */
 int lf_critical_section_exit(){
-    taskEXIT_CRITICAL();
+    taskEXIT_CRITICAL_FROM_ISR(uxSavedInterruptStatus);
     return 0;
 }
 
@@ -56,7 +57,25 @@ int lf_critical_section_exit(){
  * @return 0 on success, platform-specific error number otherwise.
  */
 int lf_notify_of_event(){
-    xEventGroupSetBits( eventGroupHandle, ACTION_EVENT_BIT );
+    BaseType_t xHigherPriorityTaskWoken, xResult;
+
+    /* xHigherPriorityTaskWoken must be initialised to pdFALSE. */
+    xHigherPriorityTaskWoken = pdFALSE;
+
+    /* Set bit 0 and bit 4 in xEventGroup. */
+    xResult = xEventGroupSetBitsFromISR(
+                                eventGroupHandle,   /* The event group being updated. */
+                                ACTION_EVENT_BIT, /* The bits being set. */
+                                &xHigherPriorityTaskWoken );
+    /* Was the message posted successfully? */
+    if( xResult != pdFAIL )
+    {
+        /* If xHigherPriorityTaskWoken is now set to pdTRUE then a context
+        switch should be requested.  The macro used is port specific and will
+        be either portYIELD_FROM_ISR() or portEND_SWITCHING_ISR() - refer to
+        the documentation page for the port being used. */
+        portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+    }
     return 0;
 }
 
