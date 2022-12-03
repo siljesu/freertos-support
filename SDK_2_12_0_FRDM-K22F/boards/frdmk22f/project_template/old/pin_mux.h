@@ -1,5 +1,6 @@
 /*
- * Copyright 2019 ,2021 NXP
+ * Copyright (c) 2016, Freescale Semiconductor, Inc.
+ * Copyright 2016-2020 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -33,37 +34,6 @@ extern "C" {
 void BOARD_InitBootPins(void);
 
 #define SOPT5_UART1TXSRC_UART_TX 0x00u /*!<@brief UART 1 transmit data source select: UART1_TX pin */
-
-/*! @name PORTE1 (number 2), J2[20]/UART1_RX_TGTMCU
-  @{ */
-
-/* Symbols to be used with PORT driver */
-#define BOARD_DEBUG_UART_RX_PORT PORTE               /*!<@brief PORT peripheral base pointer */
-#define BOARD_DEBUG_UART_RX_PIN 1U                   /*!<@brief PORT pin number */
-#define BOARD_DEBUG_UART_RX_PIN_MASK (1U << 1U)      /*!<@brief PORT pin mask */
-                                                     /* @} */
-
-/*! @name PORTC1 (number 44), J24[6]/LLWU_P6/ADC0_SE15/PUSH_BUTTON2
-  @{ */
-
-/* Symbols to be used with GPIO driver */
-#define BOARD_SW2_GPIO GPIOC               /*!<@brief GPIO peripheral base pointer */
-#define BOARD_SW2_GPIO_PIN_MASK (1U << 1U) /*!<@brief GPIO pin mask */
-
-/* Symbols to be used with PORT driver */
-#define BOARD_SW2_PORT PORTC               /*!<@brief PORT peripheral base pointer */
-#define BOARD_SW2_PIN 1U                   /*!<@brief PORT pin number */
-#define BOARD_SW2_PIN_MASK (1U << 1U)      /*!<@brief PORT pin mask */
-                                           /* @} */
-
-/*! @name PORTA2 (number 24), J1[8]/GREEN_LED
-  @{ */
-
-/* Symbols to be used with PORT driver */
-#define BOARD_LEDRGB_GREEN_PORT PORTA               /*!<@brief PORT peripheral base pointer */
-#define BOARD_LEDRGB_GREEN_PIN 2U                   /*!<@brief PORT pin number */
-#define BOARD_LEDRGB_GREEN_PIN_MASK (1U << 2U)      /*!<@brief PORT pin mask */
-                                                    /* @} */
 
 /*!
  * @brief Configures pin routing and optionally pin electrical features.

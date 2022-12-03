@@ -1,5 +1,6 @@
 /*
- * Copyright 2019 ,2021 NXP
+ * Copyright (c) 2016, Freescale Semiconductor, Inc.
+ * Copyright 2016-2020 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -14,12 +15,11 @@
 /*
  * TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
 !!GlobalInfo
-product: Pins v9.0
+product: Pins v7.0
 processor: MK22FN512xxx12
 package_id: MK22FN512VLH12
 mcu_data: ksdk2_0
-processor_version: 9.0.0
-board: FRDM-K22F
+processor_version: 0.7.9
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -43,13 +43,10 @@ void BOARD_InitBootPins(void)
 /*
  * TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
 BOARD_InitPins:
-- options: {callFromInitBoot: 'true', prefix: BOARD_, coreID: core0, enableClock: 'true'}
+- options: {callFromInitBoot: 'true', coreID: core0, enableClock: 'true'}
 - pin_list:
   - {pin_num: '1', peripheral: UART1, signal: TX, pin_signal: ADC1_SE4a/PTE0/CLKOUT32K/SPI1_PCS1/UART1_TX/I2C1_SDA/RTC_CLKOUT}
   - {pin_num: '2', peripheral: UART1, signal: RX, pin_signal: ADC1_SE5a/PTE1/LLWU_P0/SPI1_SOUT/UART1_RX/I2C1_SCL/SPI1_SIN}
-  - {pin_num: '44', peripheral: GPIOC, signal: 'GPIO, 1', pin_signal: ADC0_SE15/PTC1/LLWU_P6/SPI0_PCS3/UART1_RTS_b/FTM0_CH0/FB_AD13/I2S0_TXD0/LPUART0_RTS_b, slew_rate: fast,
-    open_drain: disable, pull_select: up, pull_enable: enable}
-  - {pin_num: '24', peripheral: TPIU, signal: SWO, pin_signal: PTA2/UART0_TX/FTM0_CH7/JTAG_TDO/TRACE_SWO/EZP_DO, pull_select: down, pull_enable: disable}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -62,49 +59,14 @@ BOARD_InitPins:
  * END ****************************************************************************************************************/
 void BOARD_InitPins(void)
 {
-    /* Port A Clock Gate Control: Clock enabled */
-    CLOCK_EnableClock(kCLOCK_PortA);
-    /* Port C Clock Gate Control: Clock enabled */
-    CLOCK_EnableClock(kCLOCK_PortC);
     /* Port E Clock Gate Control: Clock enabled */
     CLOCK_EnableClock(kCLOCK_PortE);
-
-    /* PORTA2 (pin 24) is configured as TRACE_SWO */
-    PORT_SetPinMux(BOARD_LEDRGB_GREEN_PORT, BOARD_LEDRGB_GREEN_PIN, kPORT_MuxAlt7);
-
-    PORTA->PCR[2] = ((PORTA->PCR[2] &
-                      /* Mask bits to zero which are setting */
-                      (~(PORT_PCR_PS_MASK | PORT_PCR_PE_MASK | PORT_PCR_ISF_MASK)))
-
-                     /* Pull Select: Internal pulldown resistor is enabled on the corresponding pin, if the
-                      * corresponding PE field is set. */
-                     | PORT_PCR_PS(kPORT_PullDown)
-
-                     /* Pull Enable: Internal pullup or pulldown resistor is not enabled on the corresponding pin. */
-                     | PORT_PCR_PE(kPORT_PullDisable));
-
-    const port_pin_config_t SW2 = {/* Internal pull-up resistor is enabled */
-                                   kPORT_PullUp,
-                                   /* Fast slew rate is configured */
-                                   kPORT_FastSlewRate,
-                                   /* Passive filter is disabled */
-                                   kPORT_PassiveFilterDisable,
-                                   /* Open drain is disabled */
-                                   kPORT_OpenDrainDisable,
-                                   /* Low drive strength is configured */
-                                   kPORT_LowDriveStrength,
-                                   /* Pin is configured as PTC1 */
-                                   kPORT_MuxAsGpio,
-                                   /* Pin Control Register fields [15:0] are not locked */
-                                   kPORT_UnlockRegister};
-    /* PORTC1 (pin 44) is configured as PTC1 */
-    PORT_SetPinConfig(BOARD_SW2_PORT, BOARD_SW2_PIN, &SW2);
 
     /* PORTE0 (pin 1) is configured as UART1_TX */
     PORT_SetPinMux(PORTE, 0U, kPORT_MuxAlt3);
 
     /* PORTE1 (pin 2) is configured as UART1_RX */
-    PORT_SetPinMux(BOARD_DEBUG_UART_RX_PORT, BOARD_DEBUG_UART_RX_PIN, kPORT_MuxAlt3);
+    PORT_SetPinMux(PORTE, 1U, kPORT_MuxAlt3);
 
     SIM->SOPT5 = ((SIM->SOPT5 &
                    /* Mask bits to zero which are setting */
