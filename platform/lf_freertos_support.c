@@ -44,23 +44,32 @@ int lf_critical_section_exit(){
 }
 
 int lf_notify_of_event(){
-    BaseType_t xHigherPriorityTaskWoken, xResult;
 
-    /* xHigherPriorityTaskWoken must be initialised to pdFALSE. */
-    xHigherPriorityTaskWoken = pdFALSE;
+    /* Check context to decide which API to use */
+    if (xPortIsInsideInterrupt()) {
+        BaseType_t xHigherPriorityTaskWoken, xResult;
 
-    /* Set action bit in xEventGroupHandle. */
-    xResult = xEventGroupSetBitsFromISR(xEventGroupHandle, ACTION_EVENT_BIT, &xHigherPriorityTaskWoken);
+        /* xHigherPriorityTaskWoken must be initialised to pdFALSE. */
+        xHigherPriorityTaskWoken = pdFALSE;
 
-    /* Was the message posted successfully? */
-    if( xResult != pdFAIL )
-    {
-        /* If xHigherPriorityTaskWoken is now set to pdTRUE then a context
-        switch should be requested. */
-        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-        return 0;
+        /* Set action bit in xEventGroupHandle. */
+        xResult = xEventGroupSetBitsFromISR(xEventGroupHandle, ACTION_EVENT_BIT, &xHigherPriorityTaskWoken);
+
+        /* Was the message posted successfully? */
+        if( xResult != pdFAIL )
+        {
+            /* If xHigherPriorityTaskWoken is now set to pdTRUE then a context
+            switch should be requested. */
+            portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+            return 0;
+
+        } else {
+            return -1;
+        }
     } else {
-        return -1;
+
+        xEventGroupSetBits(xEventGroupHandle, ACTION_EVENT_BIT);
+        return 0;
     }
 }
 
