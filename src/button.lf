@@ -40,6 +40,7 @@ main reactor {
 
     state last_pressed: time(0);
     physical action pressed;
+    logical action something;
 
     reaction(startup) -> pressed {=
         PRINTF("Starting...\r\n");
@@ -53,12 +54,17 @@ main reactor {
         PRINTF("Finished setup\r\n");
     =}
 
-    reaction(pressed) {=
+    reaction(pressed) -> something {=
         if (self->last_pressed == 0 || lf_time_logical() - self->last_pressed > MSEC(150)) {
 
-            self->last_pressed = lf_time_logical();
-            PRINTF("Button pushed at time %lld ns\r\n", lf_time_logical());
+            self->last_pressed = lf_time_physical();
+            PRINTF("Button pushed at time %lld ns\r\n", self->last_pressed);
 
         }
+        lf_schedule(something, SEC(1));
+    =}
+
+    reaction(something) {=
+        PRINTF("Something at time %lld ns\r\n", lf_time_physical());
     =}
 }
