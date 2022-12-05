@@ -88,8 +88,14 @@ void lf_initialize_clock(void){
 }
 
 int lf_clock_gettime(instant_t* t){
+    TickType_t uxTicks;
 
-    TickType_t uxTicks = xTaskGetTickCount() - uxClockOffsetInTicks;
+    /* Check context to decide which API to use */
+    if (xPortIsInsideInterrupt()) {
+        uxTicks = xTaskGetTickCountFromISR() - uxClockOffsetInTicks;
+    } else {
+        uxTicks = xTaskGetTickCount() - uxClockOffsetInTicks;
+    }
 
     /* Transform from ticks to ns */
     *t = ((instant_t)TICKS_TO_NS(uxTicks, configTICK_RATE_HZ));
