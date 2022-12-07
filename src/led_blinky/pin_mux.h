@@ -32,31 +32,6 @@ extern "C" {
  */
 void BOARD_InitBootPins(void);
 
-#define SOPT5_UART1TXSRC_UART_TX 0x00u /*!<@brief UART 1 transmit data source select: UART1_TX pin */
-
-/*! @name PORTE1 (number 2), J2[20]/UART1_RX_TGTMCU
-  @{ */
-
-/* Symbols to be used with PORT driver */
-#define BOARD_DEBUG_UART_RX_PORT PORTE               /*!<@brief PORT peripheral base pointer */
-#define BOARD_DEBUG_UART_RX_PIN 1U                   /*!<@brief PORT pin number */
-#define BOARD_DEBUG_UART_RX_PIN_MASK (1U << 1U)      /*!<@brief PORT pin mask */
-                                                     /* @} */
-
-/*! @name PORTC1 (number 44), J24[6]/LLWU_P6/ADC0_SE15/PUSH_BUTTON2
-  @{ */
-
-/* Symbols to be used with GPIO driver */
-#define BOARD_SW2_GPIO GPIOC               /*!<@brief GPIO peripheral base pointer */
-#define BOARD_SW2_GPIO_PIN_MASK (1U << 1U) /*!<@brief GPIO pin mask */
-
-/* Symbols to be used with PORT driver */
-#define BOARD_SW2_PORT PORTC               /*!<@brief PORT peripheral base pointer */
-#define BOARD_SW2_PIN 1U                   /*!<@brief PORT pin number */
-#define BOARD_SW2_PIN_MASK (1U << 1U)      /*!<@brief PORT pin mask */
-                                           /* @} */
-                                           
-                                           
 /*! @name PORTA1 (number 23), J2[4]/RED_LED
   @{ */
 

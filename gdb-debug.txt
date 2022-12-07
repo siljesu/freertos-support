@@ -5,7 +5,7 @@ target remote localhost:2331
 monitor reset
 
 # Load symbols
-file /home/silje/lf/freertos-support/debug/button.elf
+file /home/silje/lf/freertos-support/src/led_blinky/armgcc/debug/led_blinky.elf
 
 # load/flash application file
-load /home/silje/lf/freertos-support/debug/button.elf
+load /home/silje/lf/freertos-support/src/led_blinky/armgcc/debug/led_blinky.elf
