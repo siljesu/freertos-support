@@ -21,19 +21,19 @@ main reactor {
     reaction(startup) {=
         PRINTF("Starting...\r\n");
 
-        gpio_pin_config_t LEDRGB_RED_config = {
+        gpio_pin_config_t LED_RED_config = {
             .pinDirection = kGPIO_DigitalOutput,
             .outputLogic = 0U
         };
         /* Initialize GPIO functionality on pin PTA1 (pin 23)  */
-        GPIO_PinInit(BOARD_LEDRGB_RED_GPIO, BOARD_LEDRGB_RED_PIN, &LEDRGB_RED_config);
+        GPIO_PinInit(BOARD_LED_RED_GPIO, BOARD_LED_RED_GPIO_PIN, &LED_RED_config);
 
         /* PORTA1 (pin 23) is configured as PTA1 */
-        PORT_SetPinMux(BOARD_LEDRGB_RED_PORT, BOARD_LEDRGB_RED_PIN, kPORT_MuxAsGpio);
+        PORT_SetPinMux(BOARD_LED_RED_GPIO_PORT, BOARD_LED_RED_GPIO_PIN, kPORT_MuxAsGpio);
 
     =}
 
     reaction(t) {=
-        GPIO_PortToggle(BOARD_LEDRGB_RED_GPIO, 1u << BOARD_LEDRGB_RED_PIN);
+        GPIO_PortToggle(BOARD_LED_RED_GPIO, 1u << BOARD_LED_RED_GPIO_PIN);
     =}
 }
