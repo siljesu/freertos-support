@@ -17,7 +17,6 @@
 #define TICKS_TO_NS(ticks, freq) ((uint64_t)ticks*1000000000)/freq
 #define ACTION_EVENT_BIT ( 1UL << 0UL ) // Bit for event group to check
 
-TickType_t uxClockOffsetInTicks = 0;
 EventGroupHandle_t xEventGroupHandle;
 UBaseType_t uxSavedInterruptStatus;
 
@@ -82,9 +81,6 @@ void lf_initialize_clock(void){
         PRINTF("Insufficient memory to create Event Group");
         // Now what?
     }
-
-    /* Get tick count at start of LF clock to offset time */
-    uxClockOffsetInTicks = xTaskGetTickCount();
 }
 
 int lf_clock_gettime(instant_t* t){
@@ -92,9 +88,9 @@ int lf_clock_gettime(instant_t* t){
 
     /* Check context to decide which API to use */
     if (xPortIsInsideInterrupt()) {
-        uxTicks = xTaskGetTickCountFromISR() - uxClockOffsetInTicks;
+        uxTicks = xTaskGetTickCountFromISR();
     } else {
-        uxTicks = xTaskGetTickCount() - uxClockOffsetInTicks;
+        uxTicks = xTaskGetTickCount();
     }
 
     /* Transform from ticks to ns */
