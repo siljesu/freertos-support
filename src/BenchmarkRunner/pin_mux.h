@@ -26,28 +26,6 @@
 extern "C" {
 #endif
 
-/*! @name PORTA1 (number 23), J2[4]/RED_LED
-  @{ */
-
-/* Symbols to be used with GPIO driver */
-#define BOARD_LEDRGB_RED_GPIO GPIOA               /*!<@brief GPIO peripheral base pointer */
-#define BOARD_LEDRGB_RED_GPIO_PIN_MASK (1U << 1U) /*!<@brief GPIO pin mask */
-
-/* Symbols to be used with PORT driver */
-#define BOARD_LEDRGB_RED_PORT PORTA               /*!<@brief PORT peripheral base pointer */
-#define BOARD_LEDRGB_RED_PIN 1U                   /*!<@brief PORT pin number */
-#define BOARD_LEDRGB_RED_PIN_MASK (1U << 1U)      /*!<@brief PORT pin mask */
-                                                  /* @} */
-
-/*! @name PORTA2 (number 24), J1[8]/GREEN_LED
-  @{ */
-
-/* Symbols to be used with PORT driver */
-#define BOARD_LEDRGB_GREEN_PORT PORTA               /*!<@brief PORT peripheral base pointer */
-#define BOARD_LEDRGB_GREEN_PIN 2U                   /*!<@brief PORT pin number */
-#define BOARD_LEDRGB_GREEN_PIN_MASK (1U << 2U)      /*!<@brief PORT pin mask */
-                                                    /* @} */
-
 /*!
  * @brief Calls initialization functions.
  *

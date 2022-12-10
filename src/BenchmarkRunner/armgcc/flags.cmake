@@ -27,8 +27,6 @@ SET(CMAKE_C_FLAGS_DEBUG " \
     -DFRDM_K22F \
     -DFREEDOM \
     -DMCUXPRESSO_SDK \
-    -DSERIAL_PORT_TYPE_UART=1 \
-    -DSDK_OS_FREE_RTOS \
     -g \
     -O0 \
     -mcpu=cortex-m4 \
@@ -58,11 +56,9 @@ SET(CMAKE_C_FLAGS_RELEASE " \
     -DFRDM_K22F \
     -DFREEDOM \
     -DMCUXPRESSO_SDK \
-    -DSDK_OS_FREE_RTOS \
     -Os \
     -mcpu=cortex-m4 \
     -Wall \
-    -Wno-format \
     -mfloat-abi=hard \
     -mfpu=fpv4-sp-d16 \
     -mthumb \
@@ -85,7 +81,6 @@ SET(CMAKE_CXX_FLAGS_DEBUG " \
     -O0 \
     -mcpu=cortex-m4 \
     -Wall \
-    -Wno-format \
     -mfloat-abi=hard \
     -mfpu=fpv4-sp-d16 \
     -mthumb \
@@ -108,7 +103,6 @@ SET(CMAKE_CXX_FLAGS_RELEASE " \
     -Os \
     -mcpu=cortex-m4 \
     -Wall \
-    -Wno-format \
     -mfloat-abi=hard \
     -mfpu=fpv4-sp-d16 \
     -mthumb \
@@ -128,7 +122,6 @@ SET(CMAKE_EXE_LINKER_FLAGS_DEBUG " \
     -g \
     -mcpu=cortex-m4 \
     -Wall \
-    -Wno-format \
     -mfloat-abi=hard \
     -mfpu=fpv4-sp-d16 \
     --specs=nano.specs \
@@ -151,9 +144,9 @@ SET(CMAKE_EXE_LINKER_FLAGS_DEBUG " \
     -Xlinker \
     -Map=output.map \
     -Xlinker \
-    --defsym=__stack_size__=0x2000 \
+    --defsym=__stack_size__=0x1000 \
     -Xlinker \
-    --defsym=__heap_size__=0x8000 \
+    --defsym=__heap_size__=0x4000 \
     -T${ProjSDKPath}/devices/MK22F51212/gcc/MK22FN512xxx12_flash.ld -static \
     -Wl,--print-memory-usage \
 ")
@@ -161,7 +154,6 @@ SET(CMAKE_EXE_LINKER_FLAGS_RELEASE " \
     ${CMAKE_EXE_LINKER_FLAGS_RELEASE} \
     -mcpu=cortex-m4 \
     -Wall \
-    -Wno-format \
     -mfloat-abi=hard \
     -mfpu=fpv4-sp-d16 \
     --specs=nano.specs \
