@@ -388,6 +388,9 @@ int lf_reactor_c_main(int argc, const char* argv[]) {
             while (next() != 0);
         }
         // pqueue_free(reaction_q); FIXME: This might be causing weird memory errors
+        #ifdef PLATFORM_NXP
+        termination();
+        #endif
         return 0;
     } else {
         return -1;
