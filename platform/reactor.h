@@ -53,7 +53,7 @@
 
 #include "platform.h"  // Platform-specific times and APIs
 #include <stdio.h>
-#include <stdlib.h>
+//#include <stdlib.h>
 #include <string.h>
 #include <time.h>
 #include <limits.h>

@@ -1,4 +1,4 @@
-#include <stdlib.h> // Defines malloc.
+//#include <stdlib.h> // Defines malloc.
 #include <string.h> // Defines memcpy.
 #include <assert.h>
 #include <stdarg.h>
@@ -19,6 +19,20 @@
 
 EventGroupHandle_t xEventGroupHandle;
 UBaseType_t uxSavedInterruptStatus;
+
+void* malloc(size_t size) {
+    void* p = pvPortMalloc(size);
+    return p;
+}
+
+void* calloc(size_t size1, size_t size2) {
+    void* p = pvPortMalloc(size1*size2);
+    return p;
+}
+
+void free(void* p) {
+    vPortFree(p);
+}
 
 int lf_critical_section_enter(){
 
