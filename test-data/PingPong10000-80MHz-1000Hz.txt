@@ -1,0 +1,35 @@
+=~=~=~=~=~=~=~=~=~=~=~= PuTTY log 2022.12.14 22:00:35 =~=~=~=~=~=~=~=~=~=~=~=
+---- Start execution at time 0us
+Benchmark: PingPongLFCBenchmark
+System information
+O/S Name: Other
+Iteration 1 - 992.000 ms
+Success.
+Iteration 2 - 992.000 ms
+Success.
+Iteration 3 - 992.000 ms
+Success.
+Iteration 4 - 992.000 ms
+Success.
+Iteration 5 - 991.000 ms
+Success.
+Iteration 6 - 992.000 ms
+Success.
+Iteration 7 - 992.000 ms
+Success.
+Iteration 8 - 992.000 ms
+Success.
+Iteration 9 - 992.000 ms
+Success.
+Iteration 10 - 991.000 ms
+Success.
+Iteration 11 - 992.000 ms
+Success.
+Iteration 12 - 991.000 ms
+Success.
+Execution - Summary:
+Best Time:	 991.000 msec
+Worst Time:	 992.000 msec
+Median Time:	 992.000 msec
+---- Elapsed logical time (in nsec): 0
+---- Elapsed physical time (in nsec): 11970000000
