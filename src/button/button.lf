@@ -1,7 +1,7 @@
 target C {
     threading: false,
     build: "armgcc/build_nxp_unix.sh",
-    timeout: 10 secs,
+    platform: "FreeRTOS",
 };
 
 main reactor {
@@ -26,12 +26,37 @@ main reactor {
 
         void* button_press_action;
     
+        /* The callback function that will execute in the context of the daemon task.
+        Note callback functions must all use this same prototype. */
+        void vProcessInterface( void *pvParameter1, uint32_t ulParameter2 )
+        {
+
+            /* ...Perform the processing here... */
+            lf_schedule(pvParameter1, 0);
+
+        }
+
         void APP_WAKEUP_BUTTON_IRQ_HANDLER(void) {
+
+            BaseType_t xHigherPriorityTaskWoken;
+
             if ((1U << APP_WAKEUP_BUTTON_GPIO_PIN) & PORT_GetPinsInterruptFlags(APP_WAKEUP_BUTTON_PORT))
             {
                 PORT_ClearPinsInterruptFlags(APP_WAKEUP_BUTTON_PORT, (1U << APP_WAKEUP_BUTTON_GPIO_PIN));
                 PRINTF("push\r\n");
-                lf_schedule(button_press_action, 0);
+
+                /* The actual processing is to be deferred to a task. */
+                xHigherPriorityTaskWoken = pdFALSE;
+                xTimerPendFunctionCallFromISR(  vProcessInterface,
+                                                button_press_action,
+                                                0,
+                                                &xHigherPriorityTaskWoken );
+
+                /* If xHigherPriorityTaskWoken is now set to pdTRUE then a context
+                switch should be requested.  The macro used is port specific and will
+                be either portYIELD_FROM_ISR() or portEND_SWITCHING_ISR() - refer to
+                the documentation page for the port being used. */
+                portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
             }
             /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F Store immediate overlapping
             exception return operation might vector to incorrect interrupt */
